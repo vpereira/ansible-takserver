@@ -1,0 +1,19 @@
+---
+- name: Ensure UFW is installed
+  apt:
+    name: ufw
+    state: present
+    update_cache: yes
+
+- name: Allow TAK server ports
+  ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+  loop: "{{ takserver_ports }}"
+
+- name: Enable UFW
+  ufw:
+    state: enabled
+    policy: deny
+

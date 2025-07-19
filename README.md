@@ -120,7 +120,7 @@ multipass purge
 
 ---
 
-# TODO open UFW
+# check if open UFW are correct
 # Install certificates
 # Install TAK
 

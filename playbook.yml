@@ -1,6 +1,7 @@
 - name: Install TAK Server
   hosts: all
-  become: yes
+  become: true
   roles:
     - install_takserver
+    - ufw_takserver
 
