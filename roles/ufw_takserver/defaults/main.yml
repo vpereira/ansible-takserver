@@ -1,6 +1,7 @@
 ---
 # TODO check if its correct
 takserver_ports:
+  - 22       # SSH
   - 8087     # Web UI
   - 8443     # SSL Web UI
   - 8080     # Non-SSL Web UI / healthcheck
@@ -11,4 +12,4 @@ takserver_ports:
   - 4445     # Plugin / TAK Mesh
   - 8448     # External federation
   - 8446     # Certificate auto-enrollment
-
+  - 8554     # RTSP 
