@@ -1,0 +1,5 @@
+takserver_deb: takserver_5.4-RELEASE_all.deb
+gpg_key: takserver-public-gpg.key
+deb_policy: deb_policy.pol
+takserver_key_id: F06237936851F5B5
+

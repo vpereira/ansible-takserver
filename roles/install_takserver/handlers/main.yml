@@ -1,0 +1,5 @@
+- name: restart takserver
+  systemd:
+    name: takserver
+    state: restarted
+

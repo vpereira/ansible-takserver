@@ -1,0 +1,120 @@
+- name: Ensure required packages are installed
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  loop:
+    - openjdk-17-jdk
+    - lsb-release
+    - debsig-verify
+    - curl
+    - gnupg
+    - xmlstarlet
+
+- name: Upload .deb and supporting files
+  copy:
+    src: "{{ item }}"
+    dest: "/tmp/{{ item }}"
+  loop:
+    - "{{ takserver_deb }}"
+    - "{{ gpg_key }}"
+    - "{{ deb_policy }}"
+
+- name: Get list of available Java alternatives
+  shell: update-alternatives --list java
+  register: java_alternatives
+  changed_when: false
+
+- name: Find Java 17 alternative path
+  set_fact:
+    java17_path: "{{ item }}"
+  loop: "{{ java_alternatives.stdout_lines }}"
+  when: item is search('java-17')
+  when: java17_path is not defined
+
+- name: Automatically set Java 17 if available
+  command: update-alternatives --set java {{ java17_path }}
+  when: java17_path is defined
+
+
+- name: Set file descriptor limits for all users
+  blockinfile:
+    path: /etc/security/limits.conf
+    marker: "# {mark} ANSIBLE TAK SERVER LIMITS"
+    block: |
+      * soft nofile 32768
+      * hard nofile 32768
+
+
+- name: Extract takserver_key_id from deb_policy.pol using xmlstarlet
+  command: >
+    xmlstarlet sel -t -v '/*[local-name()="Policy"]/*[local-name()="Origin"]/@id'
+    /tmp/{{ deb_policy }}
+  register: extracted_key_id
+  changed_when: false
+
+- name: Fail if takserver_key_id does not match extracted ID
+  fail:
+    msg: "Mismatch: takserver_key_id ({{ takserver_key_id }}) != ID in deb_policy.pol ({{ extracted_key_id.stdout }})"
+  when: takserver_key_id != extracted_key_id.stdout
+
+- name: Import TAK GPG key and configure debsig-verify
+  shell: |
+    mkdir -p /usr/share/debsig/keyrings/{{ takserver_key_id }}
+    mkdir -p /etc/debsig/policies/{{ takserver_key_id }}
+
+    temp_gpg_home=$(mktemp -d)
+    chmod 700 "$temp_gpg_home"
+
+    GNUPGHOME="$temp_gpg_home" gpg --import /tmp/{{ gpg_key }}
+    GNUPGHOME="$temp_gpg_home" gpg --export > /tmp/debsig.gpg
+
+    mv /tmp/debsig.gpg /usr/share/debsig/keyrings/{{ takserver_key_id }}/debsig.gpg
+    rm -rf "$temp_gpg_home"
+
+    cp /tmp/{{ deb_policy }} /etc/debsig/policies/{{ takserver_key_id }}/debsig.pol
+  args:
+    executable: /bin/bash
+  become: true
+
+- name: Verify .deb signature
+  command: debsig-verify -v /tmp/{{ takserver_deb }}
+
+- name: Create /etc/apt/keyrings if missing
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+  become: true
+
+- name: Download PostgreSQL APT key
+  get_url:
+    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    dest: /etc/apt/keyrings/postgresql.asc
+    mode: '0644'
+  become: true
+
+- name: Add PostgreSQL APT repository
+  copy:
+    dest: /etc/apt/sources.list.d/postgresql.list
+    content: |
+      deb [signed-by=/etc/apt/keyrings/postgresql.asc] https://apt.postgresql.org/pub/repos/apt/ {{ ansible_lsb.codename }}-pgdg main
+  become: true
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+  become: true
+
+- name: Install TAK Server .deb package
+  apt:
+    deb: /tmp/{{ takserver_deb }}
+  become: true
+
+
+- name: Enable and start TAK Server
+  systemd:
+    name: takserver
+    enabled: yes
+    state: started
+
