@@ -1,0 +1,14 @@
+[Unit]
+Description=MediaMTX RTSP Server
+After=network.target
+
+[Service]
+User={{ mediamtx_user }}
+Group={{ mediamtx_group }}
+ExecStart={{ mediamtx_install_dir }}/mediamtx
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+

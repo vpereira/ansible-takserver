@@ -1,0 +1,52 @@
+- name: Ensure mediamtx user and group exist
+  ansible.builtin.user:
+    name: "{{ mediamtx_user }}"
+    group: "{{ mediamtx_group }}"
+    system: yes
+    shell: /usr/sbin/nologin
+    create_home: no
+
+- name: Create installation directory
+  file:
+    path: "{{ mediamtx_install_dir }}"
+    state: directory
+    owner: "{{ mediamtx_user }}"
+    group: "{{ mediamtx_group }}"
+    mode: '0755'
+
+- name: Download MediaMTX archive
+  get_url:
+    url: "{{ mediamtx_url }}"
+    dest: "/tmp/mediamtx.tar.gz"
+    mode: '0644'
+
+- name: Extract MediaMTX binary
+  unarchive:
+    src: "/tmp/mediamtx.tar.gz"
+    dest: "{{ mediamtx_install_dir }}"
+    remote_src: yes
+    creates: "{{ mediamtx_install_dir }}/mediamtx"
+
+- name: Create symlink to /usr/local/bin
+  file:
+    src: "{{ mediamtx_install_dir }}/mediamtx"
+    dest: "/usr/local/bin/mediamtx"
+    state: link
+    force: yes
+
+- name: Install systemd unit
+  template:
+    src: mediamtx.service.j2
+    dest: /etc/systemd/system/mediamtx.service
+    mode: '0644'
+
+- name: Reload systemd
+  systemd:
+    daemon_reload: yes
+
+- name: Enable and start MediaMTX
+  systemd:
+    name: mediamtx
+    enabled: yes
+    state: started
+

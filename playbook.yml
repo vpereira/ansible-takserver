@@ -4,4 +4,5 @@
   roles:
     - install_takserver
     - ufw_takserver
+    - install_mediamtx
 
