@@ -1,3 +1,8 @@
+- name: Create mediamtx group
+  group:
+    name: mediamtx
+    state: present
+
 - name: Ensure mediamtx user and group exist
   ansible.builtin.user:
     name: "{{ mediamtx_user }}"
@@ -14,9 +19,17 @@
     group: "{{ mediamtx_group }}"
     mode: '0755'
 
+- name: Set mediamtx architecture based on target system
+  set_fact:
+    mediamtx_arch: "{{ mediamtx_arch_map[ansible_architecture] | default(ansible_architecture) }}"
+
+- name: Set mediamtx download URL
+  set_fact:
+    mediamtx_download_url: "https://github.com/bluenviron/mediamtx/releases/download/v{{ mediamtx_version }}/mediamtx_v{{ mediamtx_version }}_linux_{{ mediamtx_arch }}.tar.gz"
+
 - name: Download MediaMTX archive
   get_url:
-    url: "{{ mediamtx_url }}"
+    url: "{{ mediamtx_download_url }}"
     dest: "/tmp/mediamtx.tar.gz"
     mode: '0644'
 
