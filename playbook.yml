@@ -3,6 +3,8 @@
   become: true
   roles:
     - install_takserver
+    - generate_takserver_certs
     - ufw_takserver
     - install_mediamtx
+
 

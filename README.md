@@ -123,4 +123,4 @@ multipass purge
 
 - check if open UFW are correct
 - Install certificates
-
+- Package mediamtx for ubuntu (so we dont have to guess which arch we are running)

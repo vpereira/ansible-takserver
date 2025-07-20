@@ -1,0 +1,47 @@
+- name: Ensure cert-metadata.sh is configured
+  ansible.builtin.blockinfile:
+    path: /opt/tak/certs/cert-metadata.sh
+    create: true
+    mode: '0755'
+    block: |
+      export COUNTRY="{{ tak_cert_country }}"
+      export STATE="{{ tak_cert_state }}"
+      export CITY="{{ tak_cert_city }}"
+      export ORGANIZATION="{{ tak_cert_org }}"
+      export ORGANIZATIONAL_UNIT="{{ tak_cert_org_unit }}"
+
+- name: Generate Root CA (non-interactive)
+  ansible.builtin.command: >
+    sudo -u tak bash -c '
+      export COUNTRY="{{ tak_cert_country }}" &&
+      export STATE="{{ tak_cert_state }}" &&
+      export CITY="{{ tak_cert_city }}" &&
+      export ORGANIZATION="{{ tak_cert_org }}" &&
+      export ORGANIZATIONAL_UNIT="{{ tak_cert_org_unit }}" &&
+      cd /opt/tak/certs &&
+      ./makeRootCa.sh --ca-name "{{ tak_cert_ca_name }}"'
+  args:
+    creates: /opt/tak/certs/CA
+
+- name: Generate Server Certificate
+  ansible.builtin.command: >
+    sudo -u tak bash -c '
+      export COUNTRY="{{ tak_cert_country }}" &&
+      export STATE="{{ tak_cert_state }}" &&
+      export CITY="{{ tak_cert_city }}" &&
+      export ORGANIZATION="{{ tak_cert_org }}" &&
+      export ORGANIZATIONAL_UNIT="{{ tak_cert_org_unit }}" &&
+      cd /opt/tak/certs &&
+      ./makeCert.sh server "{{ tak_cert_common_name }}"'
+  args:
+    creates: /opt/tak/certs/Certs/{{ tak_cert_common_name }}.pem
+
+- name: Check if JKS certificate was generated
+  ansible.builtin.stat:
+    path: "/opt/tak/certs/files/{{ tak_cert_common_name }}.jks"
+  register: jks_file
+
+- name: Fail if JKS certificate is missing
+  ansible.builtin.fail:
+    msg: "JKS certificate not found: /opt/tak/certs/files/{{ tak_cert_common_name }}.jks"
+  when: not jks_file.stat.exists

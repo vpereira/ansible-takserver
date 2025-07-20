@@ -1,0 +1,8 @@
+tak_cert_country: "US"
+tak_cert_state: "Virginia"
+tak_cert_city: "Herndon"
+tak_cert_org: "TAK"
+tak_cert_org_unit: "ProductCenter"
+tak_cert_common_name: "takserver"
+tak_cert_ca_name: "takserverca"
+

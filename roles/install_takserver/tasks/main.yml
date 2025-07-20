@@ -30,7 +30,7 @@
     java17_path: "{{ item }}"
   loop: "{{ java_alternatives.stdout_lines }}"
   when: item is search('java-17')
-  when: java17_path is not defined
+  # when: java17_path is not defined
 
 - name: Automatically set Java 17 if available
   command: update-alternatives --set java {{ java17_path }}
@@ -109,6 +109,23 @@
 - name: Install TAK Server .deb package
   apt:
     deb: /tmp/{{ takserver_deb }}
+  become: true
+
+- name: Ensure tak user has a valid home directory
+  user:
+    name: tak
+    home: /opt/tak
+    shell: /bin/bash
+    move_home: no  # Important: Do not move files
+  become: true
+
+- name: Ensure tak user has write access to /opt/tak
+  file:
+    path: /opt/tak
+    owner: tak
+    group: tak
+    recurse: no
+    state: directory
   become: true
 
 
