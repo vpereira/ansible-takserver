@@ -2,14 +2,9 @@
 # TODO check if its correct
 takserver_ports:
   - 22       # SSH
-  - 8087     # Web UI
   - 8443     # SSL Web UI
-  - 8080     # Non-SSL Web UI / healthcheck
-  - 5222     # XMPP
-  - 5223     # XMPP over SSL
-  - 9898     # File drop
-  - 8000     # ATAK data sync
-  - 4445     # Plugin / TAK Mesh
-  - 8448     # External federation
+  - 8444     # Legacy Federation
+  - 9000     # Federation
+  - 9001     # Federation
   - 8446     # Certificate auto-enrollment
-  - 8554     # RTSP 
+  - 8554     # RTSP mediamtx
