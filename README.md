@@ -8,7 +8,7 @@ This repository provides an automated way to install the official TAK Server + M
 
 - Multipass (local dev)
 - Ansible installed on your local computer
-- ssh key pair (`~/.ssh/id_ed25519.pub` must exist on your local computer)
+- ssh key pair (`~/.ssh/id_ed25519.pub` must exist on your local computer
 - You should be able to ssh into your future tak server via ssh, with ubuntu/pi user. Modify the `ansible_user` on `inventory.ini` if necessary
 
 ---
