@@ -1,18 +1,19 @@
 # Ansible Role for TAK Server Installation on Ubuntu 22.04
 
-This repository provides an automated way to install the official TAK Server + MediaMTX on a fresh Ubuntu 22.04 virtual machine using Ansible and Multipass.
+This repository provides an automated way to install the official TAK Server + MediaMTX on a fresh Ubuntu 22.04 virtual machine using Ansible. Tested on AWS, Raspberry pi and locally with Multipass.
 
 ---
 
 ## Requirements
 
-- Multipass (dev)
-- Ansible
-- ssh key pair (`~/.ssh/id_ed25519.pub` must exist)
+- Multipass (local dev)
+- Ansible installed on your local computer
+- ssh key pair (`~/.ssh/id_ed25519.pub` must exist on your local computer)
+- You should be able to ssh into your future tak server via ssh, with ubuntu/pi user. Modify the `ansible_user` on `inventory.ini` if necessary
 
 ---
 
-## Bootstrap a Virtual Machine with Multipass (dev)
+## Bootstrap a Virtual Machine with Multipass (local dev)
 
 ### 1. Launch the VM with a random name and inject your SSH public key
 
@@ -34,7 +35,7 @@ users:
 EOF
 ```
 
-### 2. Get the VM IP (dev)
+### 2. Get the VM IP (local dev)
 
 ```bash
 VM_IP=$(multipass info "$TAK_VM_NAME" --format json | jq -r ".info[\"$TAK_VM_NAME\"].ipv4[0]")
@@ -53,6 +54,7 @@ echo "VM IP: $VM_IP"
 ```
 
 Replace `<REPLACE_WITH_VM_IP>` with the value of `$VM_IP`.
+Make sure the `ansible_user` is correct. On rasperry pi, the regular user is `pi`
 
 ### 4. Test Ansible SSH connection
 
