@@ -2,6 +2,7 @@
 # TODO check if its correct
 takserver_ports:
   - 22       # SSH
+  - 8089     # Connect
   - 8443     # SSL Web UI
   - 8444     # Legacy Federation
   - 9000     # Federation
