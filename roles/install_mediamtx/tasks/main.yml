@@ -47,6 +47,21 @@
     state: link
     force: yes
 
+- name: Create config directory
+  file:
+    path: /etc/mediamtx
+    state: directory
+    owner: "{{ mediamtx_user }}"
+    group: "{{ mediamtx_group }}"
+    mode: '0755'
+
+- name: Symlink config file
+  file:
+    src: "{{ mediamtx_install_dir }}/mediamtx.conf"
+    dest: "/etc/mediamtx/mediamtx.conf"
+    state: link
+    force: yes
+
 - name: Install systemd unit
   template:
     src: mediamtx.service.j2
@@ -62,4 +77,3 @@
     name: mediamtx
     enabled: yes
     state: started
-
