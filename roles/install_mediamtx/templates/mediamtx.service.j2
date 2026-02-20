@@ -5,7 +5,7 @@ After=network.target
 [Service]
 User={{ mediamtx_user }}
 Group={{ mediamtx_group }}
-ExecStart={{ mediamtx_install_dir }}/mediamtx
+ExecStart={{ mediamtx_install_dir }}/mediamtx {{ mediamtx_install_dir }}/mediamtx.yml
 Restart=on-failure
 RestartSec=5
 
